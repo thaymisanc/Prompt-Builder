@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fubo — Prompt Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0d0f14;
+    --surface:   #151821;
+    --surface2:  #1c2030;
+    --border:    #252a3a;
+    --border2:   #2e3450;
+    --orange:    #FA4B14;
+    --orange-h:  #e03e0a;
+    --text:      #ffffff;
+    --text-2:    #a0a8c0;
+    --text-3:    #505870;
+    --text-4:    #353d58;
+    --radius:    8px;
+    --radius-sm: 5px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  nav {
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .nav-left { display: flex; align-items: center; gap: 18px; }
+  .fubo-logo svg { display: block; }
+
+  .nav-divider { width: 1px; height: 20px; background: var(--border2); }
+
+  .nav-title { font-size: 13px; font-weight: 500; color: var(--text-2); }
+
+  .nav-badge {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--orange);
+    background: rgba(250,75,20,0.1); border: 1px solid rgba(250,75,20,0.25);
+    border-radius: 20px; padding: 2px 9px;
+  }
+
+  .page { max-width: 920px; margin: 0 auto; padding: 36px 40px 60px; }
+
+  .page-header { margin-bottom: 28px; }
+  .page-header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 5px; }
+  .page-header p { font-size: 13px; color: var(--text-2); }
+
+  .section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px 24px;
+    margin-bottom: 10px;
+  }
+
+  .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+
+  .section-icon {
+    width: 28px; height: 28px;
+    background: rgba(250,75,20,0.1);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; flex-shrink: 0;
+  }
+
+  .section-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.07em;
+    text-transform: uppercase; color: var(--text-2);
+  }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; }
+  .col-2 { grid-column: span 2; }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+
+  .field-label {
+    font-size: 11px; font-weight: 500; color: var(--text-3);
+    letter-spacing: 0.04em; text-transform: uppercase;
+  }
+
+  .field-opt {
+    font-size: 10px; font-weight: 400; color: var(--text-4);
+    text-transform: none; letter-spacing: 0; margin-left: 3px;
+  }
+
+  select, input[type="text"] {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    padding: 10px 13px;
+    width: 100%;
+    transition: border-color 0.15s, background 0.15s;
+    appearance: none; -webkit-appearance: none;
+  }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23505870' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 13px center;
+    padding-right: 34px;
+    cursor: pointer;
+  }
+
+  select:focus, input[type="text"]:focus {
+    outline: none; border-color: var(--orange); background: #1a1e2d;
+  }
+
+  select option { background: #1c2030; color: #fff; }
+  input[type="text"]::placeholder { color: var(--text-4); }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 4px; }
+
+  .chip {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 20px; color: var(--text-2);
+    cursor: pointer; font-size: 12px; font-family: 'Inter', sans-serif;
+    font-weight: 500; padding: 5px 13px;
+    transition: all 0.15s; user-select: none;
+  }
+
+  .chip:hover { border-color: var(--border2); color: var(--text); }
+  .chip.active { background: var(--orange); border-color: var(--orange); color: #fff; font-weight: 600; }
+
+  .toggle-row { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+
+  .toggle-btn {
+    display: flex; align-items: center; gap: 9px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); color: var(--text-3);
+    cursor: pointer; font-family: 'Inter', sans-serif;
+    font-size: 12px; font-weight: 500; padding: 9px 13px;
+    transition: all 0.2s; white-space: nowrap; flex-shrink: 0;
+  }
+
+  .toggle-btn:hover { border-color: var(--border2); color: var(--text-2); }
+  .toggle-btn.on { background: rgba(250,75,20,0.08); border-color: rgba(250,75,20,0.4); color: var(--orange); }
+
+  .toggle-track {
+    width: 30px; height: 17px; background: var(--border2);
+    border-radius: 9px; position: relative; transition: background 0.2s; flex-shrink: 0;
+  }
+
+  .toggle-track::after {
+    content: ''; position: absolute;
+    width: 11px; height: 11px; background: var(--text-3);
+    border-radius: 50%; top: 3px; left: 3px; transition: all 0.2s;
+  }
+
+  .toggle-btn.on .toggle-track { background: var(--orange); }
+  .toggle-btn.on .toggle-track::after { background: #fff; left: 16px; }
+
+  .output-section {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden; margin-bottom: 10px;
+  }
+
+  .output-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 13px 20px; border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .output-header-left { display: flex; align-items: center; gap: 10px; }
+
+  .output-dot {
+    width: 8px; height: 8px; background: var(--orange);
+    border-radius: 50%; animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+  .output-label { font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-2); }
+  .output-counter { font-size: 11px; color: var(--text-4); font-variant-numeric: tabular-nums; }
+
+  .output-body {
+    padding: 20px; min-height: 130px;
+    font-size: 13px; line-height: 1.8;
+    color: var(--text-2); white-space: pre-wrap; word-break: break-word;
+    position: relative;
+  }
+
+  .output-placeholder { color: var(--text-4); font-style: italic; }
+
+  .copy-toast {
+    position: absolute; top: 14px; right: 14px;
+    background: var(--orange); color: #fff;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; padding: 4px 11px;
+    border-radius: var(--radius-sm);
+    opacity: 0; pointer-events: none; transition: opacity 0.25s;
+  }
+
+  .copy-toast.show { opacity: 1; }
+
+  .btn-row { display: flex; gap: 8px; margin-bottom: 28px; }
+
+  .btn {
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    border: none; border-radius: var(--radius); cursor: pointer;
+    font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600;
+    padding: 11px 20px; transition: all 0.15s; letter-spacing: 0.01em;
+  }
+
+  .btn-primary { background: var(--orange); color: #fff; flex: 1; }
+  .btn-primary:hover { background: var(--orange-h); }
+
+  .btn-ghost { background: var(--surface); border: 1px solid var(--border); color: var(--text-2); }
+  .btn-ghost:hover { border-color: var(--border2); color: var(--text); background: var(--surface2); }
+
+  .info-bar {
+    background: rgba(250,75,20,0.05); border: 1px solid rgba(250,75,20,0.15);
+    border-radius: var(--radius); padding: 13px 16px;
+    font-size: 12px; color: var(--text-3); line-height: 1.65;
+  }
+
+  .info-bar strong { color: var(--orange); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-left">
+    <a class="fubo-logo" href="#" aria-label="fubo">
+      <svg width="52" height="21" viewBox="0 0 56 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path fill="#ffffff" d="M21.3 14.7c0 1.5 0 4-2.9 4s-3-2.6-3-4V6.5h-4.2v8.1c0 5.1 2 7.8 7 7.8 1.6 0 2.5-.5 3.1-.9v.7h4.2V6.5h-4.2v8.2zM6.6 5.5c0-1.1.9-1.2 1.3-1.2h.9L9.5.6C5 .1 4 1.2 3.1 2.2c-.7 1-.8 2.3-.8 3.2v1.1H0v3.7h2.3v11.9h4.2V10.3h3.1V6.5h-3v-1zM47.7 6.2c-1.9 0-3.7.7-5.1 1.8.9 1 1.6 2.2 2 3.5.8-.9 1.9-1.5 3.1-1.5 2.3 0 4.1 2 4.1 4.4 0 2.4-1.8 4.4-4.1 4.4s-4.1-1.9-4.1-4.3c0-2.1-.8-4-2.1-5.4-1.5-1.7-3.7-2.7-6.1-2.7-1.5 0-2.9.4-4.2 1.1V.8l-4.2.7v20.6h4.2v-.7c1.2.7 2.6 1 4.2 1 1.9 0 3.7-.7 5.1-1.8-.9-1-1.6-2.2-2-3.5-.7 1-1.9 1.6-3.1 1.6-2.3 0-4.1-2-4.1-4.5s1.8-4.5 4.1-4.5 4.1 2 4.1 4.5c0 2.1.8 4 2.1 5.4.1.1.1.2.2.2.9.9 2 1.6 3.2 2 .9.3 1.8.5 2.8.5 4.6 0 8.3-3.6 8.3-8.1-.1-4.4-3.8-8-8.4-8z"/>
+      </svg>
+    </a>
+    <div class="nav-divider"></div>
+    <span class="nav-title">Prompt Builder</span>
+    <span class="nav-badge">Internal Tool</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span style="font-size:11px;color:var(--text-4);">v2.0 · 2026</span>
+    <a href="https://labs.google/fx/tools/flow" target="_blank" rel="noopener noreferrer" style="
+      display:flex; align-items:center; gap:7px;
+      background:var(--surface2); border:1px solid var(--border2);
+      border-radius:var(--radius); color:var(--text-2);
+      font-family:'Inter',sans-serif; font-size:12px; font-weight:600;
+      padding:7px 13px; text-decoration:none;
+      transition:all 0.15s; letter-spacing:0.01em;
+    "
+    onmouseover="this.style.borderColor='var(--orange)';this.style.color='#fff';this.style.background='rgba(250,75,20,0.08)'"
+    onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text-2)';this.style.background='var(--surface2)'">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+        <polyline points="15 3 21 3 21 9"/>
+        <line x1="10" y1="14" x2="21" y2="3"/>
+      </svg>
+      Open Google Flow
+    </a>
+    <a href="fubo_composer.html" style="
+      display:flex; align-items:center; gap:7px;
+      background:rgba(250,75,20,0.1); border:1px solid rgba(250,75,20,0.3);
+      border-radius:var(--radius); color:var(--orange);
+      font-family:'Inter',sans-serif; font-size:12px; font-weight:600;
+      padding:7px 13px; text-decoration:none; transition:all 0.15s;
+    "
+    onmouseover="this.style.background='rgba(250,75,20,0.2)'"
+    onmouseout="this.style.background='rgba(250,75,20,0.1)'">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      Hero Composer →
+    </a>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <h1>Hero Image Prompt Generator</h1>
+    <p>Configure your image, copy the prompt, and paste it into Google Flow. Then bring the result into the <a href="fubo_composer.html" style="color:var(--orange);text-decoration:none;font-weight:500;">Hero Composer →</a></p>
+  </div>
+
+  <!-- GUARDRAILS NOTICE -->
+  <div style="background:rgba(250,75,20,0.06);border:1px solid rgba(250,75,20,0.2);border-radius:10px;padding:14px 18px;margin-bottom:12px;display:flex;gap:12px;align-items:flex-start;">
+    <span style="flex-shrink:0;margin-top:1px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FA4B14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+    <div>
+      <div style="font-size:12px;font-weight:600;color:var(--orange);margin-bottom:4px;letter-spacing:0.02em;">AI Image Guardrails — Fubo Standards</div>
+      <div style="font-size:11px;color:var(--text-2);line-height:1.65;">
+        All generated images must be <strong style="color:var(--text);">generic and team-agnostic</strong> — no real team colors, logos, or identifiable uniforms. No real athlete likenesses, faces modeled on known players, or jersey names. Players must appear <strong style="color:var(--text);">clearly fictional</strong>. No violent, graphic, or politically sensitive imagery. Images must be suitable for a general audience. If output resembles a real athlete or team, regenerate before use.
+      </div>
+    </div>
+  </div>
+
+  <!-- IMAGE MODE TOGGLE -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 24px;margin-bottom:10px;">
+    <div style="font-size:11px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-2);margin-bottom:12px;">Image Type</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+      <button id="modeAthlete" onclick="setMode('athlete')" style="background:rgba(250,75,20,0.1);border:1px solid #FA4B14;border-radius:8px;padding:12px 10px;cursor:pointer;transition:all 0.15s;text-align:left;width:100%;font-family:'Inter',sans-serif;">
+        <div style="margin-bottom:6px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FA4B14" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2"/><path d="M12 7v6l-3 4m3-4 3 4M9 11H6m12 0h-3"/></svg></div>
+        <div id="modeLabelAthlete" style="font-size:12px;font-weight:600;color:#FA4B14;">Athlete</div>
+        <div style="font-size:10px;color:var(--text-3);margin-top:2px;">Player in action</div>
+      </button>
+      <button id="modeScene" onclick="setMode('scene')" style="background:var(--surface2);border:1px solid #252a3a;border-radius:8px;padding:12px 10px;cursor:pointer;transition:all 0.15s;text-align:left;width:100%;font-family:'Inter',sans-serif;">
+        <div style="margin-bottom:6px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a0a8c0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
+        <div id="modeLabelScene" style="font-size:12px;font-weight:600;color:#a0a8c0;">Scene</div>
+        <div style="font-size:10px;color:var(--text-3);margin-top:2px;">Venue, no player</div>
+      </button>
+      <button id="modeEvent" onclick="setMode('event')" style="background:var(--surface2);border:1px solid #252a3a;border-radius:8px;padding:12px 10px;cursor:pointer;transition:all 0.15s;text-align:left;width:100%;font-family:'Inter',sans-serif;">
+        <div style="margin-bottom:6px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a0a8c0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+        <div id="modeLabelEvent" style="font-size:12px;font-weight:600;color:#a0a8c0;">Event</div>
+        <div style="font-size:10px;color:var(--text-3);margin-top:2px;">Big moments</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- ATHLETE MODE SECTIONS -->
+  <div id="athleteSections">
+
+  <!-- SPORT & ACTION -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
+      <span class="section-label">Sport & Action</span>
+    </div>
+    <div class="grid-2" style="margin-bottom:12px;">
+      <div class="field">
+        <span class="field-label">Sport</span>
+        <select id="sport" onchange="onSportChange()">
+          <option value="">— Select Sport —</option>
+          <option value="American Football">American Football</option>
+          <option value="Soccer">Soccer</option>
+          <option value="Baseball">Baseball</option>
+          <option value="MMA / Fighter">MMA / Fighter</option>
+          <option value="Basketball">Basketball</option>
+          <option value="Tennis">Tennis</option>
+          <option value="Hockey">Hockey</option>
+          <option value="Custom">Custom Sport…</option>
+        </select>
+      </div>
+      <div class="field" id="customSportWrap" style="display:none;">
+        <span class="field-label">Custom Sport Name</span>
+        <input type="text" id="customSport" placeholder="e.g. Rugby, Golf, Volleyball…" oninput="generate()">
+      </div>
+    </div>
+    <div class="field">
+      <span class="field-label">Player Action</span>
+      <select id="action" onchange="generate()">
+        <option value="">— Select a sport first —</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- CAMERA -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+      <span class="section-label">Camera & Composition</span>
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <span class="field-label">Camera Angle</span>
+        <select id="angle" onchange="generate()">
+          <option value="3/4 face shot">3/4 Face Shot</option>
+          <option value="front-facing direct shot">Front-Facing Direct</option>
+          <option value="low angle looking up">Low Angle (Looking Up)</option>
+          <option value="side profile shot">Side Profile</option>
+          <option value="3/4 rear angle">3/4 Rear Angle</option>
+          <option value="extreme close-up on the face and helmet">Close-Up — Face / Helmet</option>
+          <option value="extreme close-up on the hands and forearms">Close-Up — Hands</option>
+          <option value="aerial overhead angle">Aerial / Overhead</option>
+        </select>
+      </div>
+      <div class="field">
+        <span class="field-label">Body Crop / Frame</span>
+        <select id="crop" onchange="generate()">
+          <option value="full body visible">Full Body</option>
+          <option value="from the hip and up">Hip & Up</option>
+          <option value="from the waist and up">Waist & Up</option>
+          <option value="from the shoulders and up">Shoulders & Up</option>
+          <option value="face and upper chest only">Face & Chest Only</option>
+          <option value="hands and forearms only">Hands & Forearms Only</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUBJECT -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+      <span class="section-label">Subject</span>
+    </div>
+    <div class="grid-4" style="margin-bottom:14px;">
+      <div class="field">
+        <span class="field-label">Gender</span>
+        <select id="gender" onchange="generate()">
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
+      </div>
+      <div class="field">
+        <span class="field-label">Skin Tone</span>
+        <select id="skintone" onchange="generate()">
+          <option value="light skin tone">Light</option>
+          <option value="medium skin tone">Medium</option>
+          <option value="light brown skin tone">Light Brown</option>
+          <option value="medium dark skin tone">Medium Dark</option>
+          <option value="dark skin tone">Dark</option>
+        </select>
+      </div>
+      <div class="field">
+        <span class="field-label">Age Range</span>
+        <select id="age" onchange="generate()">
+          <option value="in their early 20s">Early 20s</option>
+          <option value="in their mid 20s to early 30s">Mid 20s – 30s</option>
+          <option value="in their 30s">30s</option>
+          <option value="in their late 30s to early 40s">Late 30s – 40s</option>
+        </select>
+      </div>
+      <div class="field">
+        <span class="field-label">Build</span>
+        <select id="build" onchange="generate()">
+          <option value="muscular and lean">Muscular & Lean</option>
+          <option value="powerfully built and stocky">Powerfully Built</option>
+          <option value="tall and slender">Tall & Slender</option>
+          <option value="compact and explosive-looking">Compact & Explosive</option>
+        </select>
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:14px;">
+      <span class="field-label">Face Visibility</span>
+      <div class="chips" id="faceChips">
+        <div class="chip active" data-val="show" onclick="selectFaceChip(this)">Face Visible</div>
+        <div class="chip" data-val="hide" onclick="selectFaceChip(this)">No Face / Hidden</div>
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:14px;">
+      <span class="field-label">Expression & Emotion</span>
+      <div class="chips" id="expressionChips">
+        <div class="chip active" data-val="serious and intensely focused" onclick="selectChip(this)">Serious & Intense</div>
+        <div class="chip" data-val="locked in with fierce concentration" onclick="selectChip(this)">Focused</div>
+        <div class="chip" data-val="triumphant and elated" onclick="selectChip(this)">Triumphant</div>
+        <div class="chip" data-val="aggressive and fierce" onclick="selectChip(this)">Aggressive</div>
+        <div class="chip" data-val="exhausted but determined" onclick="selectChip(this)">Exhausted</div>
+        <div class="chip" data-val="calm and composed" onclick="selectChip(this)">Calm</div>
+        <div class="chip" data-val="emotionally raw" onclick="selectChip(this)">Raw Emotion</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KIT -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/></svg></div>
+      <span class="section-label">Kit & Branding</span>
+    </div>
+    <div class="grid-4" style="margin-bottom:12px;">
+      <div class="field col-2">
+        <span class="field-label">Jersey Color / Style</span>
+        <select id="jersey" onchange="generate()">
+          <option value="all-orange">Orange</option>
+          <option value="all-blue">Blue (Royal)</option>
+          <option value="all-white">White</option>
+          <option value="all-red">Red</option>
+          <option value="all-black">Black</option>
+          <option value="all-green">Green</option>
+          <option value="navy blue">Navy Blue</option>
+          <option value="all-yellow">Yellow</option>
+          <option value="gray">Gray (Away)</option>
+          <option value="white with red thin pinstripes">White w/ Red Pinstripes</option>
+          <option value="white with black trim and accents">White w/ Black Trim</option>
+        </select>
+      </div>
+      <div class="field">
+        <span class="field-label">Jersey Number</span>
+        <input type="text" id="number" value="8" maxlength="2" oninput="generate()" placeholder="e.g. 8">
+      </div>
+      <div class="field" id="badgeField">
+        <span class="field-label">League Badge</span>
+        <select id="badge" onchange="generate()">
+          <option value="">No Badge</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Soccer league — only shown for Soccer -->
+    <div class="field" id="soccerLeagueField" style="display:none;margin-bottom:14px;">
+      <span class="field-label">Soccer League / Federation</span>
+      <select id="soccerLeague" onchange="updateBadgeForSoccer();generate()">
+        <option value="a generic soccer federation badge">Generic Federation</option>
+        <option value="a UEFA Champions League badge">UEFA Champions League</option>
+        <option value="a FIFA World Cup badge">FIFA World Cup</option>
+        <option value="a Premier League badge">Premier League (EPL)</option>
+        <option value="a La Liga badge">La Liga</option>
+        <option value="a Bundesliga badge">Bundesliga</option>
+        <option value="a Serie A badge">Serie A</option>
+        <option value="a Ligue 1 badge">Ligue 1</option>
+        <option value="an MLS badge">MLS</option>
+        <option value="a CONCACAF badge">CONCACAF</option>
+        <option value="a CBF (Brazilian Football Confederation) badge">CBF (Brazil)</option>
+      </select>
+    </div>
+
+    <div class="field" id="helmetField" style="margin-bottom:14px;">
+      <span class="field-label">Helmet <span class="field-opt">— if applicable</span></span>
+      <select id="helmet" onchange="generate()">
+        <option value="none">No Helmet</option>
+        <option value="an orange helmet with a white face mask">Orange + White Mask</option>
+        <option value="a blue helmet with a white face mask">Blue + White Mask</option>
+        <option value="a white helmet with a gold face mask">White + Gold Mask</option>
+        <option value="a matte black helmet with a chrome face mask">Black + Chrome Mask</option>
+        <option value="a red helmet with a white face mask">Red + White Mask</option>
+        <option value="a green helmet with a silver face mask">Green + Silver Mask</option>
+        <option value="a white batting helmet">White Batting Helmet</option>
+        <option value="a black batting helmet">Black Batting Helmet</option>
+      </select>
+    </div>
+    <div class="field">
+      <span class="field-label">fubo Logo on Jersey <span class="field-opt">— optional, off by default</span></span>
+      <div class="toggle-row">
+        <button class="toggle-btn" id="logoToggle" onclick="toggleLogo()">
+          <span class="toggle-track"></span>
+          <span id="toggleLabel">Off — not included in prompt</span>
+        </button>
+        <div id="logoColorWrap" style="display:none; width:160px;">
+          <select id="wordmark" onchange="generate()">
+            <option value="white">White</option>
+            <option value="gold">Gold</option>
+            <option value="black">Black</option>
+            <option value="yellow">Yellow</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTING -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div>
+      <span class="section-label">Setting & Lighting</span>
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <span class="field-label">Location / Setting <span class="field-opt">— updates with sport</span></span>
+        <select id="setting" onchange="generate()">
+          <option value="a professional photography studio with a dark seamless background">Dark Studio</option>
+        </select>
+      </div>
+      <div class="field">
+        <span class="field-label">Accent / Side Light</span>
+        <select id="lightcolor" onchange="generate()">
+          <option value="natural and environmental">Match Environment</option>
+          <option value="with bold orange side lighting">Orange</option>
+          <option value="with electric blue side lighting">Blue</option>
+          <option value="with gold rim lighting">Gold Rim</option>
+          <option value="with green-tinted side lighting">Green</option>
+          <option value="with clean white studio lighting">White Studio</option>
+          <option value="with warm golden-hour light">Warm Golden</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- TECHNICAL -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg></div>
+      <span class="section-label">Photo Technical</span>
+    </div>
+    <div class="grid-3">
+      <div class="field">
+        <span class="field-label">Lens Style</span>
+        <select id="lens" onchange="generate()">
+          <option value="35mm lens aesthetic">35mm</option>
+          <option value="50mm lens aesthetic">50mm</option>
+          <option value="24mm ultra-wide lens aesthetic">24mm Ultra-Wide</option>
+          <option value="85mm portrait lens aesthetic">85mm Portrait</option>
+        </select>
+      </div>
+      <div class="field">
+        <span class="field-label">Saturation / Tone</span>
+        <select id="tone" onchange="generate()">
+          <option value="highly saturated and crisp">Highly Saturated</option>
+          <option value="cinematic and color-graded">Cinematic</option>
+          <option value="desaturated and gritty">Desaturated / Gritty</option>
+          <option value="natural and true-to-life">Natural / True-to-Life</option>
+        </select>
+      </div>
+      <div class="field">
+        <span class="field-label">Output Quality</span>
+        <select id="quality" onchange="generate()">
+          <option value="10.7K ultra-HD quality">10.7K Ultra-HD</option>
+          <option value="8K photorealistic quality">8K Photorealistic</option>
+          <option value="4K crisp digital quality">4K Crisp Digital</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- /athleteSections -->
+
+  <!-- SCENE MODE -->
+  <div id="sceneSections" style="display:none;">
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2M8 7V5a2 2 0 0 0-4 0v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg></div>
+      <span class="section-label">Venue & Sport</span>
+    </div>
+    <div class="grid-2" style="margin-bottom:12px;">
+      <div class="field">
+        <span class="field-label">Sport / Event Type</span>
+        <select id="sceneVenue" onchange="generateScene()">
+          <option value="a professional baseball stadium">Baseball Stadium</option>
+          <option value="an NFL football stadium">Football Stadium</option>
+          <option value="a professional soccer stadium">Soccer Stadium</option>
+          <option value="an NBA basketball arena">Basketball Arena</option>
+          <option value="an NHL ice hockey rink">Hockey Rink</option>
+          <option value="a professional tennis center court">Tennis Center Court</option>
+          <option value="an MMA arena with an octagon">MMA Arena</option>
+          <option value="a professional boxing arena">Boxing Arena</option>
+          <option value="a generic major sports stadium">Generic Stadium</option>
+        </select>
+      </div>
+      <div class="field">
+        <span class="field-label">Camera Perspective</span>
+        <select id="sceneAngle" onchange="generateScene()">
+          <option value="aerial drone shot looking down at the field">Aerial Drone (Top-Down)</option>
+          <option value="sweeping wide aerial shot from behind the stadium">Aerial Wide (Behind Stadium)</option>
+          <option value="ground-level field perspective looking toward the stands">Ground Level — Field</option>
+          <option value="dramatic low angle from the player tunnel entrance">Tunnel Entrance</option>
+          <option value="panoramic shot from the upper deck stands">Upper Deck Panoramic</option>
+          <option value="tight shot of the playing surface texture and markings">Playing Surface Close-Up</option>
+          <option value="silhouette against stadium lights at dusk">Silhouette Against Lights</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <span class="field-label">Time of Day / Atmosphere</span>
+        <select id="sceneTime" onchange="generateScene()">
+          <option value="late afternoon">Late Afternoon</option>
+          <option value="at night under stadium floodlights">Night (Floodlit)</option>
+          <option value="on a clear afternoon">Daytime / Clear Sky</option>
+          <option value="at dusk">Dusk</option>
+          <option value="on an overcast day">Overcast</option>
+          <option value="on a foggy morning">Morning Fog</option>
+          <option value="during a packed game with a full crowd">Game Day / Full Crowd</option>
+        </select>
+      </div>
+      <div class="field">
+        <span class="field-label">Mood / Tone</span>
+        <select id="sceneMood" onchange="generateScene()">
+          <option value="natural and true-to-life">Natural / Realistic</option>
+          <option value="warm and golden-toned">Warm & Golden</option>
+          <option value="cool-toned">Cool-Toned</option>
+          <option value="high contrast">High Contrast</option>
+          <option value="bright and open">Bright & Open</option>
+          <option value="slightly desaturated">Desaturated</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg></div>
+      <span class="section-label">Photo Technical</span>
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <span class="field-label">Lens Style</span>
+        <select id="sceneLens" onchange="generateScene()">
+          <option value="24mm ultra-wide lens aesthetic">24mm Ultra-Wide</option>
+          <option value="35mm lens aesthetic">35mm</option>
+          <option value="16mm cinematic wide lens">16mm Cinematic Wide</option>
+          <option value="drone camera lens with slight distortion">Drone Lens</option>
+        </select>
+      </div>
+      <div class="field">
+        <span class="field-label">Output Quality</span>
+        <select id="sceneQuality" onchange="generateScene()">
+          <option value="10.7K ultra-HD quality">10.7K Ultra-HD</option>
+          <option value="8K photorealistic quality">8K Photorealistic</option>
+          <option value="4K crisp digital quality">4K Crisp Digital</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  </div><!-- /sceneSections -->
+
+  <!-- EVENT MODE -->
+  <div id="eventSections" style="display:none;">
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+      <span class="section-label">Event</span>
+    </div>
+    <div class="grid-2" style="margin-bottom:12px;">
+      <div class="field">
+        <span class="field-label">Category</span>
+        <select id="eventCategory" onchange="updateEventOptions();generateEvent()">
+          <option value="sports-championship">Championship / Playoff / Finals</option>
+          <option value="soccer-tournament">Soccer Tournament</option>
+          <option value="awards">Awards & Ceremonies</option>
+          <option value="cultural">Cultural & Seasonal</option>
+          <option value="broadcast">Live Broadcast Moment</option>
+        </select>
+      </div>
+      <div class="field">
+        <span class="field-label">Specific Event</span>
+        <select id="eventSpecific" onchange="generateEvent()">
+          <option value="the FIFA World Cup Final">FIFA World Cup Final</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <span class="field-label">Atmosphere</span>
+        <select id="eventAtmos" onchange="generateEvent()">
+          <option value="peak celebration — confetti, crowd roaring, trophies raised">Peak Celebration</option>
+          <option value="tense anticipation before the decisive moment">Anticipation / Pre-Moment</option>
+          <option value="raw emotional aftermath — tears, embraces, exhaustion">Emotional Aftermath</option>
+          <option value="live broadcast energy — cameras, screens, presenters">Live Broadcast Energy</option>
+          <option value="a packed crowd in full roar, flags and banners everywhere">Crowd Energy</option>
+          <option value="a quiet, intimate moment of reflection after the final whistle">Quiet Reflection</option>
+        </select>
+      </div>
+      <div class="field">
+        <span class="field-label">Setting</span>
+        <select id="eventSetting" onchange="generateEvent()">
+          <option value="inside a packed stadium during the ceremony">Stadium Ceremony</option>
+          <option value="on the field immediately after the final whistle">On the Field</option>
+          <option value="at a live broadcast desk with screens and production lighting">Broadcast Desk</option>
+          <option value="on a red carpet or arrivals area with event branding">Red Carpet / Arrivals</option>
+          <option value="in the city streets with fans celebrating">City Street Celebration</option>
+          <option value="at an outdoor fan zone with giant screens">Fan Zone</option>
+          <option value="inside an arena or convention center">Indoor Arena</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg></div>
+      <span class="section-label">Photo Technical</span>
+    </div>
+    <div class="grid-3">
+      <div class="field">
+        <span class="field-label">Tone</span>
+        <select id="eventTone" onchange="generateEvent()">
+          <option value="natural and realistic">Natural / Realistic</option>
+          <option value="warm and golden">Warm & Golden</option>
+          <option value="high contrast and vivid">High Contrast</option>
+          <option value="cool and cinematic">Cool-Toned</option>
+          <option value="bright and energetic">Bright & Energetic</option>
+        </select>
+      </div>
+      <div class="field">
+        <span class="field-label">Lens</span>
+        <select id="eventLens" onchange="generateEvent()">
+          <option value="35mm lens aesthetic">35mm</option>
+          <option value="24mm wide lens aesthetic">24mm Wide</option>
+          <option value="50mm lens aesthetic">50mm</option>
+          <option value="85mm portrait lens">85mm Portrait</option>
+        </select>
+      </div>
+      <div class="field">
+        <span class="field-label">Quality</span>
+        <select id="eventQuality" onchange="generateEvent()">
+          <option value="10.7K ultra-HD quality">10.7K Ultra-HD</option>
+          <option value="8K photorealistic quality">8K</option>
+          <option value="4K crisp digital quality">4K</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  </div><!-- /eventSections -->
+
+  <!-- OUTPUT -->
+  <div class="output-section">
+    <div class="output-header">
+      <div class="output-header-left">
+        <div class="output-dot"></div>
+        <span class="output-label">Generated Prompt</span>
+      </div>
+      <span class="output-counter" id="counter"></span>
+    </div>
+    <div class="output-body" id="output">
+      <span class="output-placeholder">Select an image type and sport above → your prompt will appear here.</span>
+    </div>
+    <div class="copy-toast" id="toast">✓ Copied</div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="currentMode==='athlete'?generate():currentMode==='scene'?generateScene():generateEvent()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      Regenerate
+    </button>
+    <button class="btn btn-ghost" onclick="copyPrompt()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      Copy Prompt
+    </button>
+    <button class="btn btn-ghost" onclick="resetAll()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3"/></svg>
+      Reset
+    </button>
+  </div>
+
+  <div class="info-bar">
+    <strong>How to use:</strong> Select your sport → choose an action → customize every dimension → copy the prompt into Google Flow. All outputs are <strong>team-agnostic</strong>. The <strong>fubo logo</strong> is optional and off by default.
+  </div>
+</div>
+
+<script>
+const actionMap = {
+  "American Football": ["gripping a football as if about to throw it","sprinting at full speed holding the ball tightly with both hands","in a defensive ready stance with both hands raised","celebrating a touchdown with one arm raised high","leaping with arms outstretched reaching for a football above him","in a pre-snap crouch, staring down the line of scrimmage","breaking through a tackle, body low and driving forward","lined up at the line of scrimmage, poised and ready"],
+  "Soccer": ["mid-kick with all his energy and focus, body fully extended","in a low dribbling stance, eyes focused on the ball","in a full sprint with the ball at his feet","at the peak of a jump heading the ball, fully airborne","in a chest-trap position, torso twisted toward the ball","celebrating a goal with both arms wide open","taking a penalty kick, fully wound up and focused","crouching in a goalkeeper ready stance, arms wide"],
+  "Baseball": ["in a full swing follow-through, bat extended, eyes tracking the ball","at the peak of a pitching wind-up, throwing arm coiled back","fully horizontal mid-dive, glove stretched out to catch a fly ball","crouched in catcher position, mitt open and ready","in a full sprint rounding a base, arms pumping","at bat, bat cocked back and ready to swing","in mid-slide into a base, cleats forward","winding up for a powerful sidearm throw"],
+  "MMA / Fighter": ["in a high defensive guard, both fists raised alongside his head","in mid-punch, right fist extended forward, body torqued","shadowboxing mid-combination, both hands active","glaring into the lens, fists raised in a post-fight pose","walking forward in a pre-fight entrance, jaw set and eyes locked ahead","in a ground-and-pound position, mounted and coiling back a right hand","in a Muay Thai clinch stance, knees raised","exploding off the back foot into a cross-punch"],
+  "Basketball": ["mid-dunk, soaring above the rim with both hands on the ball","in a three-point shooting stance, follow-through arm extended","driving to the basket through contact, body leaning in","in a defensive slide stance, arms wide and eyes intense","dribbling low between the legs, eyes scanning the court ahead","celebrating with fist raised after a clutch play","in a post-up position with back to the basket","leaping for an alley-oop catch, fully airborne"],
+  "Tennis": ["mid-serve at peak ball contact, racket raised high above his head","in a powerful forehand swing, body fully rotated through the shot","sliding on clay to reach a wide ball, racket stretched out","in a two-handed backhand swing, eyes locked on the ball","bouncing on his toes at the baseline, racket cocked and ready","celebrating a match point with fist pumped toward the crowd","in a net volley position, racket up and cutting through the air"],
+  "Hockey": ["in a full slap-shot wind-up, stick raised high","skating at full speed with the puck on his stick","in a defensive crouch protecting the crease in front of the goal","celebrating a goal with stick raised and gloves off","in a face-off stance, stick pressed flat on the ice","leaning into a hard body check, shoulder down","in a breakaway sprint toward the opposing goal"],
+  "Custom": ["performing a key signature action in his sport","in a ready stance, poised and focused","mid-performance, body fully engaged in the movement","celebrating a winning moment, full of emotion","in an explosive athletic movement, all energy forward"]
+};
+
+let selectedExpr = "serious and intensely focused";
+
+function selectChip(el) {
+  document.querySelectorAll('#expressionChips .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  selectedExpr = el.dataset.val;
+  generate();
+}
+
+// Settings per sport
+const SETTINGS_BY_SPORT = {
+  'American Football': [
+    { v:'a professional photography studio with a dark seamless background', l:'Dark Studio' },
+    { v:'an NFL stadium sideline during a game', l:'Stadium Sideline' },
+    { v:'an NFL stadium field under bright floodlights at night', l:'Stadium (Night)' },
+    { v:'an outdoor football field on a clear afternoon', l:'Outdoor Field' },
+    { v:'a football locker room hallway', l:'Locker Room Tunnel' },
+  ],
+  'Soccer': [
+    { v:'a professional photography studio with a dark seamless background', l:'Dark Studio' },
+    { v:'a professional soccer pitch during a match', l:'Match Day Pitch' },
+    { v:'a soccer stadium at night under floodlights', l:'Stadium (Night)' },
+    { v:'an outdoor grass pitch on a clear afternoon', l:'Outdoor Pitch' },
+    { v:'a clay court soccer training ground', l:'Training Ground' },
+  ],
+  'Baseball': [
+    { v:'a professional photography studio with a dark seamless background', l:'Dark Studio' },
+    { v:'a baseball stadium during a live game', l:'Stadium (Live Game)' },
+    { v:'a baseball diamond on a clear afternoon', l:'Baseball Diamond' },
+    { v:'a baseball dugout', l:'Dugout' },
+    { v:'an outfield warning track', l:'Outfield / Warning Track' },
+  ],
+  'MMA / Fighter': [
+    { v:'a professional photography studio with a dark seamless background', l:'Dark Studio' },
+    { v:'an MMA octagon with the cage in the background', l:'MMA Octagon' },
+    { v:'a professional boxing gym with bags and equipment', l:'Boxing Gym' },
+    { v:'an MMA training facility', l:'Training Facility' },
+    { v:'an arena before a fight night event', l:'Fight Night Arena' },
+  ],
+  'Basketball': [
+    { v:'a professional photography studio with a dark seamless background', l:'Dark Studio' },
+    { v:'an NBA arena during a live game', l:'Arena (Live Game)' },
+    { v:'a professional basketball court at night under arena lights', l:'Court (Night)' },
+    { v:'an outdoor basketball court', l:'Outdoor Court' },
+    { v:'a basketball practice facility', l:'Practice Facility' },
+  ],
+  'Tennis': [
+    { v:'a professional photography studio with a dark seamless background', l:'Dark Studio' },
+    { v:'a professional clay tennis court', l:'Clay Court' },
+    { v:'a professional grass tennis court', l:'Grass Court (Wimbledon style)' },
+    { v:'a hard court tennis stadium', l:'Hard Court Stadium' },
+    { v:'an indoor tennis facility', l:'Indoor Facility' },
+  ],
+  'Hockey': [
+    { v:'a professional photography studio with a dark seamless background', l:'Dark Studio' },
+    { v:'an NHL arena ice rink during a game', l:'Arena (Live Game)' },
+    { v:'an ice rink under bright arena lights', l:'Ice Rink' },
+    { v:'a hockey locker room', l:'Locker Room' },
+  ],
+  'Custom': [
+    { v:'a professional photography studio with a dark seamless background', l:'Dark Studio' },
+    { v:'an outdoor sports venue', l:'Outdoor Venue' },
+    { v:'an indoor sports arena', l:'Indoor Arena' },
+  ],
+};
+
+function updateSettings(sport) {
+  const sel = document.getElementById('setting');
+  const opts = SETTINGS_BY_SPORT[sport] || SETTINGS_BY_SPORT['Custom'];
+  sel.innerHTML = opts.map(o => `<option value="${o.v}">${o.l}</option>`).join('');
+}
+
+// Face visibility
+let faceVisible = true;
+function selectFaceChip(el) {
+  document.querySelectorAll('#faceChips .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  faceVisible = el.dataset.val === 'show';
+  generate();
+}
+const BADGES = {
+  'American Football': [
+    { v:'an NFL captain badge', l:'NFL' },
+    { v:'a generic football league badge', l:'Generic' },
+    { v:'', l:'No Badge' },
+  ],
+  'Soccer': [], // dynamic — driven by soccerLeague select
+  'Baseball': [
+    { v:'an MLB captain badge', l:'MLB' },
+    { v:'a generic baseball league badge', l:'Generic' },
+    { v:'', l:'No Badge' },
+  ],
+  'MMA / Fighter': [
+    { v:'', l:'No Badge' },
+  ],
+  'Basketball': [
+    { v:'an NBA captain badge', l:'NBA' },
+    { v:'a generic basketball league badge', l:'Generic' },
+    { v:'', l:'No Badge' },
+  ],
+  'Tennis': [
+    { v:'a Grand Slam tournament badge', l:'Grand Slam' },
+    { v:'an ATP tour badge', l:'ATP' },
+    { v:'a WTA tour badge', l:'WTA' },
+    { v:'', l:'No Badge' },
+  ],
+  'Hockey': [
+    { v:'an NHL captain badge', l:'NHL' },
+    { v:'a generic hockey league badge', l:'Generic' },
+    { v:'', l:'No Badge' },
+  ],
+  'Custom': [
+    { v:'a generic sports captain badge', l:'Generic' },
+    { v:'', l:'No Badge' },
+  ],
+};
+
+// Sports that use a helmet
+const HELMET_SPORTS = new Set(['American Football', 'Baseball', 'Hockey']);
+// Sports that use jersey number on shoulders
+const SHOULDER_NUM_SPORTS = new Set(['American Football', 'Soccer', 'Baseball', 'Basketball', 'Hockey']);
+// Sports that don't have a jersey number
+const NO_NUMBER_SPORTS = new Set(['MMA / Fighter', 'Tennis']);
+
+function updateBadgeForSoccer() {
+  const league = document.getElementById('soccerLeague').value;
+  const badge  = document.getElementById('badge');
+  badge.innerHTML = `<option value="${league}">${league.replace(/^(a|an|A|An) /,'')}</option><option value="">No Badge</option>`;
+}
+
+function updateConditionalFields(sport) {
+  // Helmet
+  const helmetField = document.getElementById('helmetField');
+  helmetField.style.display = HELMET_SPORTS.has(sport) ? 'block' : 'none';
+  if (!HELMET_SPORTS.has(sport)) document.getElementById('helmet').value = 'none';
+
+  // Soccer league
+  const soccerField = document.getElementById('soccerLeagueField');
+  soccerField.style.display = sport === 'Soccer' ? 'block' : 'none';
+
+  // Badge options
+  const badgeSel = document.getElementById('badge');
+  if (sport === 'Soccer') {
+    updateBadgeForSoccer();
+  } else {
+    const opts = BADGES[sport] || BADGES['Custom'];
+    badgeSel.innerHTML = opts.map(o => `<option value="${o.v}">${o.l}</option>`).join('');
+  }
+
+  // Badge field visibility — hide for MMA
+  document.getElementById('badgeField').style.display = sport === 'MMA / Fighter' ? 'none' : 'block';
+
+  // Settings
+  updateSettings(sport);
+}
+
+function onSportChange() {
+  const sport = document.getElementById('sport').value;
+  document.getElementById('customSportWrap').style.display = sport === 'Custom' ? 'flex' : 'none';
+
+  const actionSel = document.getElementById('action');
+  actionSel.innerHTML = '';
+  const actions = actionMap[sport] || [];
+  if (!actions.length) {
+    actionSel.innerHTML = '<option value="">— Select a sport first —</option>';
+  } else {
+    actions.forEach(a => {
+      const opt = document.createElement('option');
+      opt.value = a;
+      opt.textContent = a.charAt(0).toUpperCase() + a.slice(1);
+      actionSel.appendChild(opt);
+    });
+    actionSel.selectedIndex = 0;
+  }
+
+  if (sport) updateConditionalFields(sport);
+  generate();
+}
+
+function generate() {
+  const sport = document.getElementById('sport').value;
+  const customSport = document.getElementById('customSport').value.trim();
+  const sportLabel = sport === 'Custom' ? (customSport || '[custom sport]') : sport;
+  const action = document.getElementById('action').value || 'in an athletic pose';
+  const angle = document.getElementById('angle').value;
+  const crop = document.getElementById('crop').value;
+  const gender = document.getElementById('gender').value;
+  const skintone = document.getElementById('skintone').value;
+  const age = document.getElementById('age').value;
+  const build = document.getElementById('build').value;
+  const jersey = document.getElementById('jersey').value;
+  const number = (document.getElementById('number').value || '8').trim();
+  const helmetVal = document.getElementById('helmet') ? document.getElementById('helmet').value : 'none';
+  const badge = document.getElementById('badge').value;
+  const setting = document.getElementById('setting').value;
+  const lightcolor = document.getElementById('lightcolor').value;
+  const lens = document.getElementById('lens').value;
+  const tone = document.getElementById('tone').value;
+  const quality = document.getElementById('quality').value;
+  const wordmarkOn = document.getElementById('logoToggle').classList.contains('on');
+  const wordmarkColor = document.getElementById('wordmark') ? document.getElementById('wordmark').value : 'white';
+
+  if (!sport) {
+    document.getElementById('output').innerHTML = '<span class="output-placeholder">Select an image type and sport above → your prompt will appear here.</span>';
+    document.getElementById('counter').textContent = '';
+    return;
+  }
+
+  // Gender-aware language
+  const pronoun  = gender === 'female' ? 'She' : 'He';
+  const genLabel = gender === 'female' ? 'female' : 'male';
+
+  // Face visibility
+  const faceStr = faceVisible
+    ? `${pronoun} commands the center of the frame in a ${angle}, with the frame showing ${crop}. Expression is ${selectedExpr}, face clearly visible, showing authentic effort and emotion.`
+    : `${pronoun} is shown in a ${angle}, with the frame showing ${crop}. Face is turned away from camera or obscured — back to camera, helmet/cap low, or head down in motion. No face visible.`;
+
+  // Conditional segments
+  const helmetStr   = (HELMET_SPORTS.has(sport) && helmetVal !== 'none') ? `${pronoun} wears ${helmetVal}. ` : '';
+  const wordmarkStr = wordmarkOn ? `The word "fubo" in ${wordmarkColor} is visible on the chest above number "${number}". ` : '';
+  const badgeStr    = badge ? `A ${badge} is displayed on the top left chest. ` : '';
+  const shoulderStr = SHOULDER_NUM_SPORTS.has(sport) ? `The number "${number}" is on each shoulder. ` : '';
+  const numberStr   = NO_NUMBER_SPORTS.has(sport) ? '' : `The number "${number}" on the chest. `;
+
+  const realism = 'Photograph should look like a real editorial sports photo — natural lighting, realistic skin and fabric texture, authentic motion. No AI artifacts, no over-processed HDR, no painterly skin, no surreal lens effects.';
+
+  const prompt = `A wide-angle, ${tone} professional sports photograph taken inside ${setting}, with a panoramic aspect ratio. A ${genLabel} ${sportLabel.toLowerCase()} player with a ${skintone}, ${age}, ${build} build, ${action}. ${faceStr} ${helmetStr}Wearing an ${jersey} jersey. ${numberStr}${wordmarkStr}${badgeStr}${shoulderStr}Lighting: ${lightcolor}. ${lens}, ${quality}. ${realism}`;
+
+  document.getElementById('output').textContent = prompt;
+  const words = prompt.trim().split(/\s+/).length;
+  document.getElementById('counter').textContent = `${words} words · ${prompt.length} chars`;
+}
+
+function toggleLogo() {
+  const btn = document.getElementById('logoToggle');
+  const colorWrap = document.getElementById('logoColorWrap');
+  const label = document.getElementById('toggleLabel');
+  const isOn = btn.classList.toggle('on');
+  colorWrap.style.display = isOn ? 'block' : 'none';
+  label.textContent = isOn ? 'On — included in prompt' : 'Off — not included in prompt';
+  generate();
+}
+
+function copyPrompt() {
+  const text = document.getElementById('output').textContent;
+  if (!text || text.includes('Select') || text.includes('image type')) return;
+  navigator.clipboard.writeText(text).then(() => {
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2200);
+  });
+}
+
+function resetAll() {
+  setMode('athlete');
+  ['sport','action','angle','crop','skintone','age','build','jersey','helmet','badge','wordmark','setting','lightcolor','lens','tone','quality',
+   'sceneVenue','sceneAngle','sceneTime','sceneMood','sceneLens','sceneQuality',
+   'eventCategory','eventSpecific','eventAtmos','eventSetting','eventTone','eventLens','eventQuality']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.selectedIndex = 0; });
+  document.getElementById('number').value = '8';
+  document.getElementById('customSport').value = '';
+  document.getElementById('customSportWrap').style.display = 'none';
+  document.getElementById('action').innerHTML = '<option value="">— Select a sport first —</option>';
+  document.getElementById('logoToggle').classList.remove('on');
+  document.getElementById('logoColorWrap').style.display = 'none';
+  document.getElementById('toggleLabel').textContent = 'Off — not included in prompt';
+  document.querySelectorAll('#expressionChips .chip').forEach((c, i) => c.classList.toggle('active', i === 0));
+  selectedExpr = "serious and intensely focused";
+  document.getElementById('output').innerHTML = '<span class="output-placeholder">Select an image type and sport above → your prompt will appear here.</span>';
+  document.getElementById('counter').textContent = '';
+}
+
+// ── MODE SWITCHING ──
+let currentMode = 'athlete';
+
+const MODE_BTNS = ['modeAthlete','modeScene','modeEvent'];
+const MODE_LABELS = { modeAthlete:'modeLabelAthlete', modeScene:'modeLabelScene', modeEvent:'modeLabelEvent' };
+const MODE_SECTIONS = { athlete:'athleteSections', scene:'sceneSections', event:'eventSections' };
+
+function setMode(mode) {
+  currentMode = mode;
+
+  // Show/hide sections
+  Object.entries(MODE_SECTIONS).forEach(([m, id]) => {
+    document.getElementById(id).style.display = m === mode ? 'block' : 'none';
+  });
+
+  // Update button styles
+  MODE_BTNS.forEach(btnId => {
+    const active = btnId === 'mode' + mode.charAt(0).toUpperCase() + mode.slice(1);
+    const btn = document.getElementById(btnId);
+    const label = document.getElementById(MODE_LABELS[btnId]);
+    btn.style.background   = active ? 'rgba(250,75,20,0.1)' : 'var(--surface2)';
+    btn.style.borderColor  = active ? '#FA4B14' : '#252a3a';
+    if (label) label.style.color = active ? '#FA4B14' : '#a0a8c0';
+    // Also update the SVG stroke inside the button
+    const svg = btn.querySelector('svg');
+    if (svg) svg.style.stroke = active ? '#FA4B14' : '#a0a8c0';
+  });
+
+  document.getElementById('output').innerHTML = '<span class="output-placeholder">Select an image type above → your prompt will appear here.</span>';
+  document.getElementById('counter').textContent = '';
+
+  if (mode === 'scene') generateScene();
+  if (mode === 'event') { updateEventOptions(); generateEvent(); }
+}
+
+// ── SCENE PROMPT GENERATOR ──
+function generateScene() {
+  const venue   = document.getElementById('sceneVenue').value;
+  const angle   = document.getElementById('sceneAngle').value;
+  const time    = document.getElementById('sceneTime').value;
+  const mood    = document.getElementById('sceneMood').value;
+  const lens    = document.getElementById('sceneLens').value;
+  const quality = document.getElementById('sceneQuality').value;
+
+  const realism = 'The image must look like a real photograph taken on location — not AI-generated, not composited. Natural lighting consistent with the time of day, realistic architectural and surface detail. No surreal colors, no lens flares, no HDR over-processing, no painterly effects.';
+
+  const prompt = `A wide-angle editorial photograph of ${venue}, captured as a ${angle}, ${time}. Tone is ${mood}. No athletes are the primary subject — the venue and atmosphere tell the story. ${realism} ${lens}, ${quality}. No visible logos, team names, or commercial signage.`;
+
+  document.getElementById('output').textContent = prompt;
+  const words = prompt.trim().split(/\s+/).length;
+  document.getElementById('counter').textContent = `${words} words · ${prompt.length} chars`;
+}
+
+// ── EVENT DATA — sourced from Fubo 2026 Event Calendar ──
+const EVENT_OPTIONS = {
+  'sports-championship': [
+    // Football
+    'the CFP National Championship',
+    'the CFP Semifinal',
+    'the CFP Quarterfinals',
+    'the Super Bowl LX',
+    'the NFL Wild Card Playoffs',
+    'the NFL Divisional Playoffs',
+    'the NFL Conference Championships',
+    'the NFL Thanksgiving Games',
+    'the NFL Hall of Fame Game',
+    'the NFL Draft',
+    // Basketball
+    'the NBA Finals',
+    'the NBA Conference Finals',
+    'the NBA Conference Semifinals',
+    'the NBA Playoffs',
+    'the NBA Play-In Tournament',
+    'the NCAAM Final Four',
+    'the NCAAM Championship',
+    'the NCCAW Final Four',
+    'the NCCAW Championship',
+    'March Madness first round',
+    'the March Madness Sweet 16',
+    'the March Madness Elite 8',
+    // Baseball
+    'the World Series',
+    'the MLB All-Star Game',
+    'the Home Run Derby',
+    'the World Baseball Classic Final',
+    'the World Baseball Classic — USA vs. Mexico',
+    // Hockey
+    'the Stanley Cup Final',
+    'the NHL Conference Finals',
+    'the NHL Playoffs',
+    'the NHL Stadium Series',
+    'the IIHF World Championship Final',
+    // Soccer
+    'the FIFA World Cup Final',
+    'the FIFA World Cup Semifinals',
+    'the FIFA World Cup Quarterfinals',
+    'the FIFA World Cup — USA vs. Paraguay',
+    'the FIFA World Cup — USA vs. Australia',
+    'the FIFA World Cup — USA vs. Türkiye',
+    'the FIFA World Cup Group Stage',
+    'the UEFA Champions League Final',
+    'the UEFA Champions League Semifinals',
+    'the Women\'s UEFA Champions League Final',
+    'the FA Cup Final',
+    'El Clasico — Real Madrid vs. Barcelona',
+    'the MLS Cup Final',
+    'the Liga MX Clausura Final',
+    // Golf
+    'The Masters',
+    'the US Open Golf',
+    'the PGA Championship',
+    'the Open Championship',
+    // Tennis
+    'the Australian Open Finals',
+    'the French Open Finals',
+    'the Wimbledon Finals',
+    'the US Open Tennis Finals',
+    // Racing
+    'the Daytona 500',
+    'the Indy 500',
+    'the F1 Season Finale',
+    // Other
+    'the Kentucky Derby',
+    'the Preakness Stakes',
+    'the Belmont Stakes',
+    'the Little League World Series Championship',
+  ],
+  'soccer-tournament': [
+    'the FIFA World Cup Final',
+    'the FIFA World Cup Semifinals',
+    'the FIFA World Cup Quarterfinals',
+    'the FIFA World Cup Group Stage',
+    'the FIFA World Cup — USA vs. Paraguay',
+    'the FIFA World Cup — USA vs. Australia',
+    'the FIFA World Cup — USA vs. Türkiye',
+    'the UEFA Champions League Final',
+    'the UEFA Champions League Semifinals',
+    'the Women\'s UEFA Champions League Final',
+    'El Clasico — Real Madrid vs. Barcelona',
+    'the FA Cup Final',
+    'the La Liga Season Finale',
+    'the EPL Season Finale',
+    'the Liga MX Apertura season opener',
+    'the Liga MX Clausura Final',
+    'the MLS Cup Final',
+    'a MLS regular season match',
+    'the CONCACAF Gold Cup',
+    'the Copa América',
+    'the Euros — UEFA European Championship',
+  ],
+  'awards': [
+    'the Super Bowl LX Halftime Show',
+    'the NFL Honors',
+    'the NFL Draft — Day 1',
+    'the NBA Draft',
+    'the NHL Draft',
+    'the ESPYs',
+    'the Oscars ceremony',
+    'the Grammy Awards',
+    'the Golden Globes',
+    'the NAACP Image Awards',
+    'the iHeart Music Awards',
+    'a championship trophy presentation ceremony',
+    'an NFL Hall of Fame induction ceremony',
+  ],
+  'cultural': [
+    'New Year\'s Day — CFB Bowl season',
+    'Super Bowl Sunday',
+    'the Winter Olympics Opening Ceremony',
+    'the Winter Olympics',
+    'Selection Sunday — March Madness',
+    'MLB Opening Day',
+    'America\'s 250th Anniversary celebration',
+    'the Fourth of July',
+    'a holiday season sports event',
+    'an NFL Thanksgiving game day',
+    'WrestleMania weekend',
+    'the Boston Marathon',
+    'the World Baseball Classic',
+    'the T20 Cricket World Cup Final',
+    'the T20 Cricket World Cup — India vs. Pakistan',
+    'IPL Championship',
+    'the Daytona 500 race day',
+  ],
+  'broadcast': [
+    'a live NFL broadcast in progress',
+    'a Super Bowl broadcast moment',
+    'a March Madness live broadcast',
+    'a FIFA World Cup live broadcast',
+    'a halftime show broadcast',
+    'an NFL Draft night broadcast',
+    'a post-game press conference',
+    'a sports talk show set',
+    'a live playoff broadcast',
+  ],
+};
+
+function updateEventOptions() {
+  const cat = document.getElementById('eventCategory').value;
+  const sel = document.getElementById('eventSpecific');
+  const opts = EVENT_OPTIONS[cat] || [];
+  sel.innerHTML = opts.map(o => `<option value="${o}">${o}</option>`).join('');
+}
+
+// ── EVENT GENERIC LABELS — strips specificity so AI can't infer teams/flags ──
+function genericEventLabel(specific) {
+  const map = {
+    // Soccer / World Cup
+    'the FIFA World Cup Final':                         'a major international soccer championship final',
+    'the FIFA World Cup Semifinals':                    'a major international soccer championship semifinal',
+    'the FIFA World Cup Quarterfinals':                 'a major international soccer championship quarterfinal',
+    'the FIFA World Cup Group Stage':                   'an international soccer tournament group stage match',
+    'the FIFA World Cup — USA vs. Paraguay':            'an international soccer tournament group stage match',
+    'the FIFA World Cup — USA vs. Australia':           'an international soccer tournament group stage match',
+    'the FIFA World Cup — USA vs. Türkiye':             'an international soccer tournament group stage match',
+    'the UEFA Champions League Final':                  'a major European club soccer championship final',
+    'the UEFA Champions League Semifinals':             'a major European club soccer championship semifinal',
+    'the Women\'s UEFA Champions League Final':         'a major women\'s European club soccer championship final',
+    'El Clasico — Real Madrid vs. Barcelona':           'a high-stakes rivalry match between two top club soccer teams',
+    'the FA Cup Final':                                 'a major domestic soccer cup final',
+    'the La Liga Season Finale':                        'a major professional soccer league final day',
+    'the EPL Season Finale':                            'a major professional soccer league final day',
+    'the Liga MX Apertura season opener':               'a major professional soccer league season opener',
+    'the Liga MX Clausura Final':                       'a major professional soccer league final',
+    'the MLS Cup Final':                                'a major professional soccer league championship final',
+    'a MLS regular season match':                       'a professional soccer regular season match',
+    'the CONCACAF Gold Cup':                            'a major regional soccer championship',
+    'the Copa América':                                 'a major international soccer tournament',
+    'the Euros — UEFA European Championship':           'a major international soccer championship tournament',
+    // Football
+    'the CFP National Championship':                    'a major college football national championship game',
+    'the CFP Semifinal':                                'a college football playoff semifinal',
+    'the CFP Quarterfinals':                            'a college football playoff quarterfinal',
+    'the Super Bowl LX':                                'the biggest professional football championship game of the year',
+    'the NFL Wild Card Playoffs':                       'a professional football wild card playoff game',
+    'the NFL Divisional Playoffs':                      'a professional football divisional playoff game',
+    'the NFL Conference Championships':                 'a professional football conference championship game',
+    'the NFL Thanksgiving Games':                       'a professional football Thanksgiving day game',
+    'the NFL Hall of Fame Game':                        'a professional football preseason Hall of Fame game',
+    'the NFL Draft':                                    'a major professional football draft event',
+    // Basketball
+    'the NBA Finals':                                   'a major professional basketball championship final',
+    'the NBA Conference Finals':                        'a professional basketball conference final',
+    'the NBA Conference Semifinals':                    'a professional basketball conference semifinal',
+    'the NBA Playoffs':                                 'a professional basketball playoff game',
+    'the NBA Play-In Tournament':                       'a professional basketball play-in tournament game',
+    'the NCAAM Final Four':                             'a college basketball Final Four game',
+    'the NCAAM Championship':                           'a college basketball national championship game',
+    'the NCCAW Final Four':                             'a women\'s college basketball Final Four game',
+    'the NCCAW Championship':                           'a women\'s college basketball national championship game',
+    'March Madness first round':                        'a college basketball tournament first round game',
+    'the March Madness Sweet 16':                       'a college basketball tournament Sweet 16 game',
+    'the March Madness Elite 8':                        'a college basketball tournament Elite 8 game',
+    // Baseball
+    'the World Series':                                 'a major professional baseball championship series game',
+    'the MLB All-Star Game':                            'a major professional baseball all-star game',
+    'the Home Run Derby':                               'a professional baseball home run competition',
+    'the World Baseball Classic Final':                 'an international baseball championship final',
+    'the World Baseball Classic — USA vs. Mexico':      'an international baseball championship game',
+    // Hockey
+    'the Stanley Cup Final':                            'a major professional hockey championship final',
+    'the NHL Conference Finals':                        'a professional hockey conference final',
+    'the NHL Playoffs':                                 'a professional hockey playoff game',
+    'the NHL Stadium Series':                           'a professional hockey outdoor stadium game',
+    'the IIHF World Championship Final':                'an international hockey world championship final',
+    // Golf
+    'The Masters':                                      'a major professional golf championship tournament',
+    'the US Open Golf':                                 'a major professional golf championship tournament',
+    'the PGA Championship':                             'a major professional golf championship tournament',
+    'the Open Championship':                            'a major professional golf championship tournament',
+    // Tennis
+    'the Australian Open Finals':                       'a major professional tennis Grand Slam final',
+    'the French Open Finals':                           'a major professional tennis Grand Slam final',
+    'the Wimbledon Finals':                             'a major professional tennis Grand Slam final',
+    'the US Open Tennis Finals':                        'a major professional tennis Grand Slam final',
+    // Racing
+    'the Daytona 500':                                  'a major professional stock car racing championship event',
+    'the Indy 500':                                     'a major professional open-wheel racing championship event',
+    'the F1 Season Finale':                             'a major Formula 1 racing season finale',
+    // Other
+    'the Kentucky Derby':                               'a major professional horse racing championship event',
+    'the Preakness Stakes':                             'a major professional horse racing championship event',
+    'the Belmont Stakes':                               'a major professional horse racing championship event',
+    'the Little League World Series Championship':      'a youth baseball world championship game',
+    // Awards
+    'the Super Bowl LX Halftime Show':                  'a massive live halftime performance at a major sporting event',
+    'the NFL Honors':                                   'a major professional football awards ceremony',
+    'the NFL Draft — Day 1':                            'a major professional football draft night broadcast',
+    'the NBA Draft':                                    'a major professional basketball draft night broadcast',
+    'the NHL Draft':                                    'a major professional hockey draft night broadcast',
+    'the ESPYs':                                        'a major sports awards ceremony',
+    'the Oscars ceremony':                              'a major entertainment awards ceremony on a red carpet',
+    'the Grammy Awards':                                'a major music awards ceremony',
+    'the Golden Globes':                                'a major entertainment awards ceremony',
+    'the NAACP Image Awards':                           'a major cultural awards ceremony',
+    'the iHeart Music Awards':                          'a major music awards ceremony',
+    'a championship trophy presentation ceremony':      'a championship trophy presentation ceremony',
+    'an NFL Hall of Fame induction ceremony':           'a sports hall of fame induction ceremony',
+    // Cultural
+    'New Year\'s Day — CFB Bowl season':                'a festive New Year\'s Day sports event atmosphere',
+    'Super Bowl Sunday':                                'the biggest sports event Sunday of the year',
+    'the Winter Olympics Opening Ceremony':             'a Winter Olympics opening ceremony with athletes and spectacle',
+    'the Winter Olympics':                              'a Winter Olympics competition venue and crowd atmosphere',
+    'Selection Sunday — March Madness':                 'a college basketball bracket reveal event',
+    'MLB Opening Day':                                  'a professional baseball season opening day',
+    'America\'s 250th Anniversary celebration':         'a large patriotic celebration and public gathering',
+    'the Fourth of July':                               'a patriotic summer holiday celebration',
+    'a holiday season sports event':                    'a festive holiday season sports event atmosphere',
+    'an NFL Thanksgiving game day':                     'a Thanksgiving day professional football game atmosphere',
+    'WrestleMania weekend':                             'a major professional wrestling entertainment event',
+    'the Boston Marathon':                              'a major city marathon with runners and crowd energy',
+    'the World Baseball Classic':                       'an international baseball championship tournament',
+    'the T20 Cricket World Cup Final':                  'an international cricket championship final',
+    'the T20 Cricket World Cup — India vs. Pakistan':   'a high-stakes international cricket match',
+    'IPL Championship':                                 'a professional cricket league championship final',
+    'the Daytona 500 race day':                         'a major stock car racing event with crowd and track atmosphere',
+    // Broadcast
+    'a live NFL broadcast in progress':                 'a live professional football broadcast in progress',
+    'a Super Bowl broadcast moment':                    'a live major football championship broadcast moment',
+    'a March Madness live broadcast':                   'a live college basketball tournament broadcast',
+    'a FIFA World Cup live broadcast':                  'a live international soccer championship broadcast',
+    'a halftime show broadcast':                        'a live halftime entertainment broadcast at a major sporting event',
+    'an NFL Draft night broadcast':                     'a live professional football draft night broadcast',
+    'a post-game press conference':                     'a post-game press conference setting',
+    'a sports talk show set':                           'a professional sports talk show broadcast set',
+    'a live playoff broadcast':                         'a live playoff game broadcast moment',
+  };
+  return map[specific] || `a major sports event — ${specific}`;
+}
+
+// ── EVENT PROMPT GENERATOR ──
+function generateEvent() {
+  const specific = document.getElementById('eventSpecific').value;
+  const atmos    = document.getElementById('eventAtmos').value;
+  const setting  = document.getElementById('eventSetting').value;
+  const tone     = document.getElementById('eventTone').value;
+  const lens     = document.getElementById('eventLens').value;
+  const quality  = document.getElementById('eventQuality').value;
+
+  // Use generic label — never pass the specific event name directly
+  const genericLabel = genericEventLabel(specific);
+
+  const guardrail = 'CRITICAL: The image must show NO team colors, NO national flags, NO identifiable uniforms, NO team logos, NO country-specific imagery, NO tournament branding or signage. No faces of real identifiable athletes. The scene must be fully generic — it could represent any event of this type, not a specific one. Crowd, venue, lighting, and atmosphere only. Any AI-generated image that includes specific team or national identification must be regenerated.';
+
+  const realism = 'The image must look like a real editorial or photojournalistic photograph — not AI-generated or staged. Authentic crowd energy, real environmental lighting, no surreal effects, no HDR over-processing.';
+
+  const prompt = `A wide-angle ${tone} editorial photograph capturing the atmosphere of ${genericLabel}. The scene is ${setting}, with ${atmos}. ${guardrail} ${realism} ${lens}, ${quality}.`;
+
+  document.getElementById('output').textContent = prompt;
+  const words = prompt.trim().split(/\s+/).length;
+  document.getElementById('counter').textContent = `${words} words · ${prompt.length} chars`;
+}
+</script>
+</body>
+</html>
