@@ -301,7 +301,8 @@
     <div>
       <div style="font-size:12px;font-weight:600;color:var(--orange);margin-bottom:4px;letter-spacing:0.02em;">AI Image Guardrails — Fubo Standards</div>
       <div style="font-size:11px;color:var(--text-2);line-height:1.65;">
-        All generated images must be <strong style="color:var(--text);">generic and team-agnostic</strong> — no real team colors, logos, or identifiable uniforms. No real athlete likenesses, faces modeled on known players, or jersey names. Players must appear <strong style="color:var(--text);">clearly fictional</strong>. No violent, graphic, or politically sensitive imagery. Images must be suitable for a general audience. If output resembles a real athlete or team, regenerate before use.
+        <strong style="color:var(--text);">DO:</strong> Authentic action, real stadiums with fans, natural lighting, fabric texture, shallow depth of field, diverse representation, correct anatomy, single focus point, credible uniforms with no brand logos. &nbsp;
+        <strong style="color:var(--text);">AVOID:</strong> CGI/3D rendering, studio shots, fake backgrounds, face close-ups, multiple balls, busy compositions, copyright marks on kit, cultural stereotypes, empty fields without fans, over-edited or too-perfect skin.
       </div>
     </div>
   </div>
@@ -850,57 +851,54 @@ function selectChip(el) {
 // Settings per sport
 const SETTINGS_BY_SPORT = {
   'American Football': [
-    { v:'a professional photography studio with a dark seamless background', l:'Dark Studio' },
-    { v:'an NFL stadium sideline during a game', l:'Stadium Sideline' },
-    { v:'an NFL stadium field under bright floodlights at night', l:'Stadium (Night)' },
-    { v:'an outdoor football field on a clear afternoon', l:'Outdoor Field' },
-    { v:'a football locker room hallway', l:'Locker Room Tunnel' },
+    { v:'a packed NFL stadium with fans in the stands under floodlights at night', l:'Stadium (Night — Full Crowd)' },
+    { v:'an NFL stadium sideline during a live game with crowd visible', l:'Sideline (Live Game)' },
+    { v:'a packed NFL stadium on a clear afternoon, crowd energy visible', l:'Stadium (Day Game)' },
+    { v:'an NFL stadium tunnel entrance leading to the field', l:'Tunnel Entrance' },
+    { v:'a close-up on the turf of an NFL field during a game, crowd blurred in background', l:'Field Level (Close-Up)' },
   ],
   'Soccer': [
-    { v:'a professional photography studio with a dark seamless background', l:'Dark Studio' },
-    { v:'a professional soccer pitch during a match', l:'Match Day Pitch' },
-    { v:'a soccer stadium at night under floodlights', l:'Stadium (Night)' },
-    { v:'an outdoor grass pitch on a clear afternoon', l:'Outdoor Pitch' },
-    { v:'a clay court soccer training ground', l:'Training Ground' },
+    { v:'a professional soccer stadium packed with fans during a live match under floodlights', l:'Stadium (Night Match)' },
+    { v:'a professional soccer pitch during a match with blurred crowd in background', l:'Match Day Pitch' },
+    { v:'a clay soccer pitch during a match, crowd visible in stands', l:'Clay Court Match' },
+    { v:'a grass pitch aerial view of an active match with players and fans', l:'Aerial Stadium View' },
+    { v:'a soccer stadium at dusk with fans filling the stands', l:'Stadium (Dusk)' },
   ],
   'Baseball': [
-    { v:'a professional photography studio with a dark seamless background', l:'Dark Studio' },
-    { v:'a baseball stadium during a live game', l:'Stadium (Live Game)' },
-    { v:'a baseball diamond on a clear afternoon', l:'Baseball Diamond' },
-    { v:'a baseball dugout', l:'Dugout' },
-    { v:'an outfield warning track', l:'Outfield / Warning Track' },
+    { v:'a professional baseball stadium during a live game with fans in the stands', l:'Stadium (Live Game)' },
+    { v:'a baseball diamond close-up during a game, crowd blurred behind', l:'Diamond (Field Level)' },
+    { v:'an outfield warning track during a game with packed stadium behind', l:'Outfield (Full Stadium)' },
+    { v:'a baseball dugout during a live game, stadium atmosphere visible', l:'Dugout' },
+    { v:'an aerial view of a baseball stadium during a live game', l:'Aerial Stadium View' },
   ],
   'MMA / Fighter': [
-    { v:'a professional photography studio with a dark seamless background', l:'Dark Studio' },
-    { v:'an MMA octagon with the cage in the background', l:'MMA Octagon' },
-    { v:'a professional boxing gym with bags and equipment', l:'Boxing Gym' },
-    { v:'an MMA training facility', l:'Training Facility' },
-    { v:'an arena before a fight night event', l:'Fight Night Arena' },
+    { v:'an MMA octagon during a live fight with crowd visible in the arena', l:'Octagon (Live Fight)' },
+    { v:'a professional boxing arena packed with fans during a fight night', l:'Fight Night Arena' },
+    { v:'a close-up inside an MMA octagon cage with arena lighting and crowd behind', l:'Octagon Close-Up' },
+    { v:'a professional MMA gym with real training equipment in background', l:'Training Gym' },
   ],
   'Basketball': [
-    { v:'a professional photography studio with a dark seamless background', l:'Dark Studio' },
-    { v:'an NBA arena during a live game', l:'Arena (Live Game)' },
-    { v:'a professional basketball court at night under arena lights', l:'Court (Night)' },
-    { v:'an outdoor basketball court', l:'Outdoor Court' },
-    { v:'a basketball practice facility', l:'Practice Facility' },
+    { v:'a packed NBA arena during a live game with crowd visible in stands', l:'Arena (Live Game)' },
+    { v:'a professional basketball court during a game, crowd blurred in background', l:'Court Level (Game)' },
+    { v:'an aerial overhead view of an NBA court during a live game', l:'Aerial Court View' },
+    { v:'a close-up on the basketball court floor during a game, sneakers and ball in frame', l:'Court Close-Up' },
   ],
   'Tennis': [
-    { v:'a professional photography studio with a dark seamless background', l:'Dark Studio' },
-    { v:'a professional clay tennis court', l:'Clay Court' },
-    { v:'a professional grass tennis court', l:'Grass Court (Wimbledon style)' },
-    { v:'a hard court tennis stadium', l:'Hard Court Stadium' },
-    { v:'an indoor tennis facility', l:'Indoor Facility' },
+    { v:'a professional clay tennis court during a match with packed stands visible', l:'Clay Court (Match)' },
+    { v:'a professional grass court during a match with crowd in background', l:'Grass Court (Match)' },
+    { v:'a hard court tennis stadium during a match with fans visible', l:'Hard Court (Stadium)' },
+    { v:'a close-up on a tennis court surface during a match, crowd blurred behind', l:'Court Close-Up' },
   ],
   'Hockey': [
-    { v:'a professional photography studio with a dark seamless background', l:'Dark Studio' },
-    { v:'an NHL arena ice rink during a game', l:'Arena (Live Game)' },
-    { v:'an ice rink under bright arena lights', l:'Ice Rink' },
-    { v:'a hockey locker room', l:'Locker Room' },
+    { v:'a packed NHL arena during a live game with crowd visible in stands', l:'Arena (Live Game)' },
+    { v:'a close-up on the ice rink during a game with arena lights and crowd behind', l:'Ice Level Close-Up' },
+    { v:'an aerial view of a hockey rink during a live game', l:'Aerial Rink View' },
+    { v:'a hockey rink board-level view during a game with players and fans', l:'Board Level (Game)' },
   ],
   'Custom': [
-    { v:'a professional photography studio with a dark seamless background', l:'Dark Studio' },
-    { v:'an outdoor sports venue', l:'Outdoor Venue' },
-    { v:'an indoor sports arena', l:'Indoor Arena' },
+    { v:'a packed professional sports stadium during a live game with fans in stands', l:'Stadium (Live Game)' },
+    { v:'a sports venue close-up during an active competition with crowd behind', l:'Venue Close-Up' },
+    { v:'an aerial view of a professional sports venue during a live event', l:'Aerial View' },
   ],
 };
 
@@ -1062,9 +1060,9 @@ function generate() {
   const shoulderStr = SHOULDER_NUM_SPORTS.has(sport) ? `The number "${number}" is on each shoulder. ` : '';
   const numberStr   = NO_NUMBER_SPORTS.has(sport) ? '' : `The number "${number}" on the chest. `;
 
-  const realism = 'Photograph should look like a real editorial sports photo — natural lighting, realistic skin and fabric texture, authentic motion. No AI artifacts, no over-processed HDR, no painterly skin, no surreal lens effects.';
+  const realism = `PHOTOGRAPHY STANDARDS — this must look like a real editorial sports photograph, indistinguishable from professional photojournalism. ACHIEVE: authentic action captured mid-motion, natural stadium or venue lighting, real fabric texture with wrinkles and sweat, realistic skin with natural imperfections, single clear focus point, shallow depth of field with background fans and stadium visible but blurred, correct anatomy (exactly 5 fingers per hand), consistent and credible uniform with no conflicting team elements, diverse representation. AVOID: CGI or 3D rendering, over-edited or too-perfect plastic skin, studio lighting or fake backgrounds, multiple balls or distracting focus points, unusual or awkward poses, busy cluttered compositions, face close-ups (focus on action and body), any copyright logos or registered trademarks on kit, cultural stereotypes or clichés, unreadable or malformed text on jerseys, impossible stadium geometry, empty fields with no atmosphere — always include blurred crowd or stadium environment in background.`;
 
-  const prompt = `A wide-angle, ${tone} professional sports photograph taken inside ${setting}, with a panoramic aspect ratio. A ${genLabel} ${sportLabel.toLowerCase()} player with a ${skintone}, ${age}, ${build} build, ${action}. ${faceStr} ${helmetStr}Wearing an ${jersey} jersey. ${numberStr}${wordmarkStr}${badgeStr}${shoulderStr}Lighting: ${lightcolor}. ${lens}, ${quality}. ${realism}`;
+  const prompt = `A wide-angle, ${tone} editorial sports photograph taken at ${setting}, panoramic aspect ratio. A ${genLabel} ${sportLabel.toLowerCase()} player with a ${skintone}, ${age}, ${build} build, ${action}. ${faceStr} ${helmetStr}Wearing an ${jersey} jersey with no visible brand logos or registered marks. ${numberStr}${wordmarkStr}${badgeStr}${shoulderStr}Lighting: ${lightcolor}. ${lens}, ${quality}. ${realism}`;
 
   document.getElementById('output').textContent = prompt;
   const words = prompt.trim().split(/\s+/).length;
@@ -1154,7 +1152,7 @@ function generateScene() {
   const lens    = document.getElementById('sceneLens').value;
   const quality = document.getElementById('sceneQuality').value;
 
-  const realism = 'The image must look like a real photograph taken on location — not AI-generated, not composited. Natural lighting consistent with the time of day, realistic architectural and surface detail. No surreal colors, no lens flares, no HDR over-processing, no painterly effects.';
+  const realism = `PHOTOGRAPHY STANDARDS — must look like a real editorial photograph taken on location, indistinguishable from professional sports photojournalism. ACHIEVE: real stadium architecture with authentic markings and patterns, fans visible in stands adding atmosphere, natural venue lighting consistent with time of day, genuine depth of field, aerial or overhead angles showing real field/court geometry, rich environmental texture. AVOID: empty stadiums with no fans, 3D rendered or CGI environments, impossible or bad stadium geometry, fake or studio lighting, overly saturated or HDR-processed look, generic fields without atmosphere, unnecessary visual clutter.`;
 
   const prompt = `A wide-angle editorial photograph of ${venue}, captured as a ${angle}, ${time}. Tone is ${mood}. No athletes are the primary subject — the venue and atmosphere tell the story. ${realism} ${lens}, ${quality}. No visible logos, team names, or commercial signage.`;
 
@@ -1452,9 +1450,9 @@ function generateEvent() {
   // Use generic label — never pass the specific event name directly
   const genericLabel = genericEventLabel(specific);
 
-  const guardrail = 'CRITICAL: The image must show NO team colors, NO national flags, NO identifiable uniforms, NO team logos, NO country-specific imagery, NO tournament branding or signage. No faces of real identifiable athletes. The scene must be fully generic — it could represent any event of this type, not a specific one. Crowd, venue, lighting, and atmosphere only. Any AI-generated image that includes specific team or national identification must be regenerated.';
+  const guardrail = `IDENTITY GUARDRAIL — NO team colors, NO national flags, NO identifiable uniforms, NO team or league logos, NO country-specific imagery, NO tournament branding. The scene must be fully generic — applicable to any event of this type. If any specific team or national identification appears, regenerate.`;
 
-  const realism = 'The image must look like a real editorial or photojournalistic photograph — not AI-generated or staged. Authentic crowd energy, real environmental lighting, no surreal effects, no HDR over-processing.';
+  const realism = `PHOTOGRAPHY STANDARDS — must look like a real editorial or photojournalistic photograph, indistinguishable from professional event coverage. ACHIEVE: authentic crowd reactions and energy, real venue atmosphere with fans visible, natural environmental lighting, genuine depth of field, human diversity in crowd. AVOID: CGI or 3D environments, studio lighting, too-perfect or plastic surfaces, empty venues, over-processed HDR, culturally stereotyped imagery, busy or cluttered compositions.`;
 
   const prompt = `A wide-angle ${tone} editorial photograph capturing the atmosphere of ${genericLabel}. The scene is ${setting}, with ${atmos}. ${guardrail} ${realism} ${lens}, ${quality}.`;
 
