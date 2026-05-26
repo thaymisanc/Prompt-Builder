@@ -274,25 +274,13 @@
       </svg>
       Open Google Flow
     </a>
-    <a href="fubo_composer.html" style="
-      display:flex; align-items:center; gap:7px;
-      background:rgba(250,75,20,0.1); border:1px solid rgba(250,75,20,0.3);
-      border-radius:var(--radius); color:var(--orange);
-      font-family:'Inter',sans-serif; font-size:12px; font-weight:600;
-      padding:7px 13px; text-decoration:none; transition:all 0.15s;
-    "
-    onmouseover="this.style.background='rgba(250,75,20,0.2)'"
-    onmouseout="this.style.background='rgba(250,75,20,0.1)'">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-      Hero Composer →
-    </a>
   </div>
 </nav>
 
 <div class="page">
   <div class="page-header">
     <h1>Hero Image Prompt Generator</h1>
-    <p>Configure your image, copy the prompt, and paste it into Google Flow. Then bring the result into the <a href="fubo_composer.html" style="color:var(--orange);text-decoration:none;font-weight:500;">Hero Composer →</a></p>
+    <p>Configure your image, copy the prompt, and paste it into Google Flow.</p>
   </div>
 
   <!-- GUARDRAILS NOTICE -->
@@ -301,8 +289,8 @@
     <div>
       <div style="font-size:12px;font-weight:600;color:var(--orange);margin-bottom:4px;letter-spacing:0.02em;">AI Image Guardrails — Fubo Standards</div>
       <div style="font-size:11px;color:var(--text-2);line-height:1.65;">
-        <strong style="color:var(--text);">DO:</strong> Authentic action, real stadiums with fans, natural lighting, fabric texture, shallow depth of field, diverse representation, correct anatomy, single focus point, credible uniforms with no brand logos. &nbsp;
-        <strong style="color:var(--text);">AVOID:</strong> CGI/3D rendering, studio shots, fake backgrounds, face close-ups, multiple balls, busy compositions, copyright marks on kit, cultural stereotypes, empty fields without fans, over-edited or too-perfect skin.
+        <strong style="color:var(--text);">DO:</strong> Authentic action, real stadiums with fans, natural lighting, fabric texture, shallow depth of field, diverse representation, correct anatomy, single focus point, plain solid-color unbranded uniform. &nbsp;
+        <strong style="color:var(--text);">AVOID:</strong> CGI/3D rendering, studio shots, face close-ups, multiple balls, busy compositions, Adidas/Nike/Puma/Under Armour or any brand marks on kit or shoes, Apple Watch or wearable branding, cultural stereotypes, empty fields without fans.
       </div>
     </div>
   </div>
@@ -1060,9 +1048,11 @@ function generate() {
   const shoulderStr = SHOULDER_NUM_SPORTS.has(sport) ? `The number "${number}" is on each shoulder. ` : '';
   const numberStr   = NO_NUMBER_SPORTS.has(sport) ? '' : `The number "${number}" on the chest. `;
 
-  const realism = `PHOTOGRAPHY STANDARDS — this must look like a real editorial sports photograph, indistinguishable from professional photojournalism. ACHIEVE: authentic action captured mid-motion, natural stadium or venue lighting, real fabric texture with wrinkles and sweat, realistic skin with natural imperfections, single clear focus point, shallow depth of field with background fans and stadium visible but blurred, correct anatomy (exactly 5 fingers per hand), consistent and credible uniform with no conflicting team elements, diverse representation. AVOID: CGI or 3D rendering, over-edited or too-perfect plastic skin, studio lighting or fake backgrounds, multiple balls or distracting focus points, unusual or awkward poses, busy cluttered compositions, face close-ups (focus on action and body), any copyright logos or registered trademarks on kit, cultural stereotypes or clichés, unreadable or malformed text on jerseys, impossible stadium geometry, empty fields with no atmosphere — always include blurred crowd or stadium environment in background.`;
+  const kitGuardrail = `UNIFORM GUARDRAIL — CRITICAL: The uniform must be completely unbranded. NO Adidas stripes or trefoil, NO Nike swoosh or text, NO Puma cat, NO Under Armour logo, NO New Balance N, NO Reebok vector, NO Jordan jumpman, NO Champion C, NO Lululemon, NO Apple Watch or any wearable device branding, NO visible watch faces with brand markings, NO shoe brand logos on cleats or sneakers, NO manufacturer tags, NO sponsor patches, NO visible text of any brand name anywhere on the kit, shoes, or accessories. The jersey, shorts, socks, shoes, helmet, and gloves must all be solid colors or simple geometric patterns with zero brand identification. If any sportswear or technology brand marking appears anywhere on the athlete, regenerate the image.`;
 
-  const prompt = `A wide-angle, ${tone} editorial sports photograph taken at ${setting}, panoramic aspect ratio. A ${genLabel} ${sportLabel.toLowerCase()} player with a ${skintone}, ${age}, ${build} build, ${action}. ${faceStr} ${helmetStr}Wearing an ${jersey} jersey with no visible brand logos or registered marks. ${numberStr}${wordmarkStr}${badgeStr}${shoulderStr}Lighting: ${lightcolor}. ${lens}, ${quality}. ${realism}`;
+  const realism = `PHOTOGRAPHY STANDARDS — this must look like a real editorial sports photograph, indistinguishable from professional photojournalism. ACHIEVE: authentic action captured mid-motion, natural stadium or venue lighting, real fabric texture with wrinkles and sweat, realistic skin with natural imperfections, single clear focus point, shallow depth of field with background fans and stadium visible but blurred, correct anatomy (exactly 5 fingers per hand), consistent and credible uniform with no conflicting team elements, diverse representation. AVOID: CGI or 3D rendering, over-edited or too-perfect plastic skin, studio lighting or fake backgrounds, multiple balls or distracting focus points, unusual or awkward poses, busy cluttered compositions, face close-ups (focus on action and body), cultural stereotypes or clichés, unreadable or malformed text on jerseys, impossible stadium geometry, empty fields with no atmosphere — always include blurred crowd or stadium environment in background.`;
+
+  const prompt = `A wide-angle, ${tone} editorial sports photograph taken at ${setting}, panoramic aspect ratio. A ${genLabel} ${sportLabel.toLowerCase()} player with a ${skintone}, ${age}, ${build} build, ${action}. ${faceStr} ${helmetStr}Wearing a plain ${jersey} uniform — solid color with no branding, no stripes associated with any brand, no logos of any kind. ${numberStr}${wordmarkStr}${badgeStr}${shoulderStr}Lighting: ${lightcolor}. ${lens}, ${quality}. ${kitGuardrail} ${realism}`;
 
   document.getElementById('output').textContent = prompt;
   const words = prompt.trim().split(/\s+/).length;
